@@ -22,7 +22,7 @@ services:
       - SMTP_SERVICE=${SMTP_SERVICE}
       - SMTP_PASS=${SMTP_PASS}
       - SMTP_HOST=${SMTP_HOST}
-      - FRONTEND_URL=${FRONTEND_URL}
+      - FRONTEND_URL=${FRONTEND_URL:-https://buildr-io-web.vercel.app}
       
     volumes:
       # Mount logs directory for persistent logging

@@ -35,7 +35,7 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(urlencoded({ extended: true }));
 
-const allowedOrigins = [process.env.FRONTEND_URL!, "http://localhost:4002", "http://localhost:3000"];
+const allowedOrigins = [process.env.FRONTEND_URL!, "http://localhost:3000", "https://buildr-io-web.vercel.app"];
 
 const corsOptions: cors.CorsOptions = {
   origin: (origin, callback) => {
