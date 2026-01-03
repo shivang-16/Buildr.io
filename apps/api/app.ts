@@ -68,6 +68,10 @@ app.get("/api", (req, res) => {
   res.send("Hello, world!");
 });
 
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
 app.use(errorMiddleware);
 
 export { app };
