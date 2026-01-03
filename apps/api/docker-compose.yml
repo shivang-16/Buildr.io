@@ -6,7 +6,7 @@ services:
     #   dockerfile: apps/api/Dockerfile
     #   target: runner
     # For production deployment, use image from Docker Hub
-    image: ${DOCKER_USERNAME}/buildr-api:latest
+    image: shivangm16/buildr-api:latest
     container_name: buildr-api
     ports:
       - "${PORT:-4000}:4000"
