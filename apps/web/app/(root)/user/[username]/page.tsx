@@ -1,4 +1,4 @@
-import { getUserByUsername, getCurrentUser } from "@/actions/user_actions"
+import { getUserProfile, getCurrentUser } from "@/actions/user_actions"
 import { UserProfile } from "@/components/profile/UserProfile"
 import { notFound } from "next/navigation"
 
@@ -10,7 +10,7 @@ export default async function UserPage({ params }: UserPageProps) {
   const { username } = await params
   
   // Get user profile
-  const userData = await getUserByUsername(username)
+  const userData = await getUserProfile(username)
   
   if (!userData.success || !userData.user) {
     notFound()

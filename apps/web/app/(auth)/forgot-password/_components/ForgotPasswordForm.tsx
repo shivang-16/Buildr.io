@@ -24,7 +24,8 @@ import * as z from "zod";
 
 const ForgotPasswordSchema = z.object({
   email: z
-    .string({ required_error: "Please enter your email." })
+    .string()
+    .min(1, "Please enter your email.")
     .email({ message: "Invalid email address!" }),
 });
 
@@ -56,8 +57,8 @@ const ForgotPassword = () => {
     <section className="w-full h-full flex items-center justify-center">
       <div className="max-w-lg w-full rounded-xl shadow-2xl flex flex-col items-center justify-center gap-y-2 p-10">
         <Image
-          src="/assets/images/leadlly_logo.svg"
-          alt="Leadlly Logo"
+          src="/assets/images/buildr_logo.svg"
+          alt="Buildr Logo"
           width={130}
           height={130}
         />
@@ -87,7 +88,7 @@ const ForgotPassword = () => {
                     <Input
                       placeholder="example@mail.com"
                       className="focus-visible:ring-0 text-lg focus:ring-offset-0"
-                      inputWrapperClassName="h-12"
+
                       {...field}
                     />
                   </FormControl>

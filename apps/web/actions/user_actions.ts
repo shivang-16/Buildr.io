@@ -270,3 +270,24 @@ export async function loginUser(data: { email: string; password: string }) {
     return { success: false, message: 'Failed to login' };
   }
 }
+// Forgot password
+export async function forgotPassword(data: { email: string }) {
+  try {
+    const response = await apiClient.post("/api/auth/forgot-password", data);
+    return { success: true, message: response.data.message };
+  } catch (error: any) {
+    console.error("Failed to request password reset:", error);
+    return { success: false, message: error.response?.data?.message || "Failed to request password reset" };
+  }
+}
+
+// Reset password
+export async function resetPassword(data: { password: string }, token: string) {
+  try {
+    const response = await apiClient.post(`/api/auth/reset-password/${token}`, data);
+    return { success: true, message: response.data.message };
+  } catch (error: any) {
+    console.error("Failed to reset password:", error);
+    return { success: false, message: error.response?.data?.message || "Failed to reset password" };
+  }
+}

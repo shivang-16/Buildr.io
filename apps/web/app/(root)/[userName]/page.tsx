@@ -18,7 +18,7 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("Posts")
   const [isFollowing, setIsFollowing] = useState(false)
 
-  const username = Array.isArray(userName) ? userName[0] : (userName ?? "")
+  const username = Array.isArray(userName) ? (userName[0] || "") : (userName ?? "")
   // Decode username incase it has special chars like @ (though URL usually doesn't have @)
   const decodedUsername = decodeURIComponent(username)
 

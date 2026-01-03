@@ -13,7 +13,7 @@ const ConnectToDB = async () => {
       autoIndex: true, // Enable automatic index creation
     });
     db = mongoose.connection;
-    console.log("Leadlly_DB Connected.");
+    console.log("DB Connected.");
   } catch (error) {
     console.log("Error connecting to databases:", error);
   }

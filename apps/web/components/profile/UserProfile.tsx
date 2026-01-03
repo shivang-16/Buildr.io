@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { ArrowLeft, Calendar, MapPin, Link as LinkIcon, MoreHorizontal } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
-import { followUser, User } from "@/actions/user_actions"
+import { toggleFollow, User } from "@/actions/user_actions"
 
 interface UserProfileProps {
   user: User
@@ -23,7 +23,7 @@ export function UserProfile({ user, isOwnProfile, currentUserId }: UserProfilePr
 
   const handleFollow = () => {
     startTransition(async () => {
-      const result = await followUser(user._id)
+      const result = await toggleFollow(user._id)
       if (result.success) {
         setIsFollowing(result.isFollowing)
         setFollowerCount(prev => result.isFollowing ? prev + 1 : prev - 1)
