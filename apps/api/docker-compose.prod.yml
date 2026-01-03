@@ -17,10 +17,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1.5'
-          memory: 2G
-        reservations:
           cpus: '0.5'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
           memory: 512M
       
       # Restart policy for production
