@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import GoogleLoginButton from "@/app/(auth)/_components/GoogleLoginButton";
 
+
 const Login = () => {
   const [togglePassword, setTogglePassword] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -34,7 +35,6 @@ const Login = () => {
       password: "",
     },
   });
-
   const onFormSubmit = async (data: z.infer<typeof signInSchema>) => {
     setIsLoggingIn(true);
 

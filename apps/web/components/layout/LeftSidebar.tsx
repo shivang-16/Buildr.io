@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Home, Bell, Bookmark, MoreHorizontal, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -15,9 +15,47 @@ const sidebarItems = [
   { icon: Bookmark, label: "Bookmarks", href: "/bookmarks" },
 ]
 
+import { getNotifications } from "@/actions/notification_actions"
+// ...
+
 export function LeftSidebar() {
   const pathname = usePathname()
   const [createPostOpen, setCreatePostOpen] = useState(false)
+  const [user, setUser] = useState<{firstname: string, lastname?: string, username?: string, avatar?: string} | null>(null)
+  const [unreadCount, setUnreadCount] = useState(0)
+
+  useEffect(() => {
+    // Only fetch client-side for sidebar display
+    const fetchUser = async () => {
+        try {
+            // We can import getCurrentUser from user_actions but need to dynamic import or use effect
+            const { getCurrentUser } = await import("@/actions/user_actions")
+            const res = await getCurrentUser()
+            if (res.success && res.user) {
+                setUser(res.user)
+            }
+        } catch (e) {
+            console.error(e)
+        }
+    }
+    
+    const fetchNotificationsCount = async () => {
+         try {
+             // Import getNotifications dynamically or use top level import if possible (it's server action so strict import is fine usually)
+             // But we used import in function body for getCurrentUser earlier to avoid cyclic deps or server/client mix? No, getCurrentUser is server action.
+             // We can just call getNotifications if imported.
+             const res = await getNotifications(1, 1)
+             if (res.success && 'unreadCount' in res) {
+                 setUnreadCount(res.unreadCount as number)
+             }
+         } catch (e) {
+             console.error(e)
+         }
+    }
+
+    fetchUser()
+    fetchNotificationsCount()
+  }, [])
 
   return (
     <aside className="sticky top-0 z-20 hidden h-screen w-[275px] flex-shrink-0 flex-col justify-between border-r bg-background px-4 py-4 lg:flex">
@@ -38,7 +76,12 @@ export function LeftSidebar() {
                   isActive ? "font-bold" : "font-medium"
                 }`}
               >
-                <Icon className="h-7 w-7" />
+                <div className="relative">
+                    <Icon className="h-7 w-7" />
+                    {item.label === "Notifications" && unreadCount > 0 && (
+                        <span className="absolute -top-1 -right-0 h-2.5 w-2.5 rounded-full bg-red-500 border-2 border-background box-content" />
+                    )}
+                </div>
                 <span>{item.label}</span>
               </Link>
             )
@@ -54,17 +97,23 @@ export function LeftSidebar() {
       </div>
 
       <div className="mb-4">
-        <Button variant="ghost" className="flex h-auto w-full items-center justify-start gap-3 rounded-full px-4 py-3 hover:bg-accent">
-          <Avatar>
-            <AvatarImage src="https://github.com/shadcn.png" />
-            <AvatarFallback>CN</AvatarFallback>
-          </Avatar>
-          <div className="flex flex-col items-start text-sm">
-            <span className="font-bold">Shivang Yadav</span>
-            <span className="text-muted-foreground">@16_shivang</span>
-          </div>
-          <MoreHorizontal className="ml-auto h-5 w-5" />
-        </Button>
+        <Link href={user?.username ? `/${user.username}` : "/feed"}>
+            <Button variant="ghost" className="flex h-auto w-full items-center justify-start gap-3 rounded-full px-4 py-3 hover:bg-accent">
+                <Avatar>
+                    <AvatarImage src={user?.avatar} />
+                    <AvatarFallback>{user?.firstname?.[0]}</AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col items-start text-sm">
+                    <span className="font-bold whitespace-nowrap overflow-hidden text-ellipsis w-[130px] text-left">
+                        {user ? `${user.firstname} ${user.lastname || ""}` : "Loading..."}
+                    </span>
+                    <span className="text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis w-[130px] text-left">
+                        @{user?.username || "loading"}
+                    </span>
+                </div>
+                <MoreHorizontal className="ml-auto h-5 w-5 shrink-0" />
+            </Button>
+        </Link>
       </div>
 
       <CreatePostDialog open={createPostOpen} onOpenChange={setCreatePostOpen} />

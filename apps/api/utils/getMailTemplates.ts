@@ -6,7 +6,7 @@ export const getTemplate = (options: Options) => {
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
     <tr>
       <td style="padding:30px 20px;text-align:center;">
-        <img alt="Leadlly" height="60" src="https://res.cloudinary.com/ytx/image/upload/v1731270603/Group_124_zru2yd.png" style="max-height: 60px;" />
+        <h1 style="font-family: Arial, sans-serif; color: #333; margin: 0; font-size: 32px;">Buildr</h1>
       </td>
     </tr>
   </table>
@@ -21,23 +21,23 @@ export const getTemplate = (options: Options) => {
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
           <tr>
             <td style="text-align:left;padding-bottom:15px;width:66%">
-              <img alt="Leadlly" height="36" src="https://res.cloudinary.com/ytx/image/upload/v1731270603/Group_124_zru2yd.png" width="120" />
+              <h2 style="font-family: Arial, sans-serif; color: #333; margin: 0; font-size: 24px;">Buildr</h2>
             </td>
             <td style="text-align:right;padding-bottom:15px;">
               <table role="presentation" cellspacing="0" cellpadding="0" style="width:100%">
                 <tr>
                   <td style="padding-right:10px;">
-                    <a href="https://x.com/leadlly_ed" target="_blank">
+                    <a href="https://x.com/Buildr_ed" target="_blank">
                       <img alt="Twitter" height="32" src="https://res.cloudinary.com/ytx/image/upload/v1731407923/twitter-x_ft91uu.png" width="32" />
                     </a>
                   </td>
                   <td style="padding-right:10px;">
-                    <a href="https://www.instagram.com/leadlly.in" target="_blank">
+                    <a href="https://www.instagram.com/Buildr.in" target="_blank">
                       <img alt="Instagram" height="32" src="https://res.cloudinary.com/ytx/image/upload/v1731407923/instagram_1_z0cos7.png" width="32" />
                     </a>
                   </td>
                   <td>
-                    <a href="https://www.linkedin.com/company/leadlly-edu/" target="_blank">
+                    <a href="https://www.linkedin.com/company/Buildr-edu/" target="_blank">
                       <img alt="LinkedIn" height="32" src="https://res.cloudinary.com/ytx/image/upload/v1731407923/linkdin_igumjq.png" width="32" />
                     </a>
                   </td>
@@ -49,8 +49,8 @@ export const getTemplate = (options: Options) => {
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
           <tr>
             <td style="font-size:12px;color:#b7b7b7;text-align:center;padding-top:15px;padding-bottom:15px;">
-              <a href="https://www.leadlly.in/terms-and-conditions" style="color:#b7b7b7;text-decoration:underline;" target="_blank">Terms & Conditions</a> | <a href="https://www.leadlly.in/privacy-policy" style="color:#b7b7b7;text-decoration:underline;" target="_blank">Privacy Policy</a> | <a href="https://play.google.com/store/apps/details?id=com.leadlly.app" style="color:#b7b7b7;text-decoration:underline;" target="_blank">Download the App</a>
-              <p style="margin-top:20px;">©2022 Leadlly Edusolutions Pvt. Ltd. All rights reserved.</p>
+              <a href="https://www.Buildr.in/terms-and-conditions" style="color:#b7b7b7;text-decoration:underline;" target="_blank">Terms & Conditions</a> | <a href="https://www.Buildr.in/privacy-policy" style="color:#b7b7b7;text-decoration:underline;" target="_blank">Privacy Policy</a> | <a href="https://play.google.com/store/apps/details?id=com.Buildr.app" style="color:#b7b7b7;text-decoration:underline;" target="_blank">Download the App</a>
+              <p style="margin-top:20px;">©2022 Buildr Edusolutions Pvt. Ltd. All rights reserved.</p>
             </td>
           </tr>
         </table>
@@ -67,7 +67,7 @@ export const getTemplate = (options: Options) => {
 			return baseTemplate(`
        
         <h1 style="font-size:28px;font-weight:700;margin:30px 0;color:#333;">Confirm Your Email Address</h1>
-    <p style="font-size:18px;margin-bottom:30px;color:#555;">Please use the code below to complete your registration for Leadlly.</p>
+    <p style="font-size:18px;margin-bottom:30px;color:#555;">Please use the code below to complete your registration for Buildr.</p>
     
   
     <div style="background-color:#f5f4f5; border-radius:8px; padding:25px; text-align:center; max-width:300px; margin:auto; margin-bottom:30px;">
@@ -176,7 +176,7 @@ export const getTemplate = (options: Options) => {
   <tr>
     <td style="text-align: center;">
       <p style="font-size: 14px; line-height: 24px; font-weight: 500; color: #111111;">
-        If you have any questions, feel free to <a href="mailto:support@leadlly.in" style="color: #9652f4; text-decoration: none;">contact us</a>.
+        If you have any questions, feel free to <a href="mailto:support@Buildr.in" style="color: #9652f4; text-decoration: none;">contact us</a>.
       </p>
       <p style="font-size: 14px; line-height: 24px; font-weight: 500; color: #111111;">
         Thank you for choosing our service!
@@ -203,7 +203,7 @@ export const getTemplate = (options: Options) => {
   </a>
   
   <p style="font-size: 14px; color: #555; margin-top: 30px;">
-    If you have any questions, feel free to <a href="mailto:support@leadlly.in" style="color: #9652f4;">contact us</a>.
+    If you have any questions, feel free to <a href="mailto:support@Buildr.in" style="color: #9652f4;">contact us</a>.
   </p>
   
   <p style="font-size: 16px; color: #333; margin-top: 30px;">Thank you for choosing our service!</p>
@@ -271,7 +271,7 @@ export const getTemplate = (options: Options) => {
   </p>
   
   <p style="font-size: 14px; color: #777; margin-top: 30px; text-align: center;">
-    This is an automated message from the Leadlly Referral System.
+    This is an automated message from the Buildr Referral System.
   </p>
 
 </div>

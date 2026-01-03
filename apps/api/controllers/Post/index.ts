@@ -3,6 +3,7 @@ import Post from "../../models/postModel";
 import User from "../../models/userModel";
 import { CustomError } from "../../middlewares/error";
 import { uploadToCloudinary, deleteFromCloudinary } from "../../utils/cloudinary";
+import { createNotification } from "../Notification";
 
 // Get feed posts
 export const getFeedPosts = async (
@@ -132,6 +133,12 @@ export const createPost = async (
       await Post.findByIdAndUpdate(replyTo, {
         $push: { replies: post._id },
       });
+
+      // Notify parent post author
+      const parentPost = await Post.findById(replyTo); // Fetch again or use cached if available (we fetched earlier)
+      if (parentPost) {
+          await createNotification(parentPost.author.toString(), userId.toString(), "comment", replyTo);
+      }
     }
 
     const populatedPost = await Post.findById(post._id).populate(
@@ -186,6 +193,9 @@ export const upvotePost = async (
         );
       }
       post.upvotes.push(userId);
+
+      // Create notification
+      await createNotification(post.author.toString(), userId.toString(), "like", id);
     }
 
     await post.save();

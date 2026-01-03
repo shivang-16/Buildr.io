@@ -8,7 +8,8 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
 
-    const response = await apiClient.post('/api/auth/login', body);
+    const backendUrl = process.env.API_BASE_URL || "http://localhost:4000";
+    const response = await apiClient.post(`${backendUrl}/api/auth/login`, body);
     
     const { token, ...userData } = response.data;
     

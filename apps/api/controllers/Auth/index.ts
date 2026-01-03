@@ -192,13 +192,22 @@ export const otpVerification = async (
     }
 
     const newUser = otpRecord.newUser;
+    
+    // Create a plain object to avoid Mongoose subdocument issues (VersionError)
+    const userData = {
+      firstname: newUser.firstname,
+      lastname: newUser.lastname,
+      email: newUser.email,
+      password: newUser.password
+    };
+
     console.log("otpVerification: Creating user", { 
       email, 
-      firstname: newUser.firstname,
-      lastname: newUser.lastname 
+      firstname: userData.firstname,
+      lastname: userData.lastname 
     });
     
-    const user = await User.create(newUser);
+    const user = await User.create(userData);
     await OTPModel.deleteOne({ email });
     console.log("otpVerification: User created and OTP record deleted", { email, userId: user._id });
 
@@ -229,7 +238,7 @@ export const login = async (
     const { email, password } = req.body;
     console.log("login: Login request", { email });
 
-    const user = await User.findOne({ email }).select("+password");
+    const user = await User.findOne({ email }).select("+password +salt");
     if (!user) {
       console.log("login: Email not registered", { email });
       return next(new CustomError("Email not registered", 404));

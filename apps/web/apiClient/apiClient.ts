@@ -7,10 +7,11 @@ interface ApiClientConfig {
   credentials?: RequestCredentials;
 }
 
-interface RequestConfig extends Omit<RequestInit, "body"> {
+interface RequestConfig extends Omit<RequestInit, "body" | "headers"> {
   url: string;
   data?: any;
   params?: Record<string, string | number | boolean>;
+  headers?: Record<string, string>;
 }
 
 interface ApiResponse<T = any> {
@@ -90,6 +91,16 @@ class ApiClient {
     }
 
     if (!response.ok) {
+      if (response.status === 401) {
+          // Token expired or invalid
+           if (typeof window !== "undefined") {
+              // Clear cookie via js if possible (HttpOnly won't work but we can try)
+              document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT";
+              if (!window.location.pathname.startsWith("/login")) {
+                  window.location.href = "/login";
+              }
+           }
+      }
       const error: ApiError = new Error(
         `HTTP Error: ${response.status} ${response.statusText}`
       );
@@ -147,6 +158,7 @@ class ApiClient {
     }
 
     try {
+      console.log(`[ApiClient] Request: ${config.method || 'GET'} ${requestUrl}`);
       const response = await fetch(requestUrl, requestConfig);
       return this.handleResponse<T>(response);
     } catch (error) {

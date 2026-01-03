@@ -6,7 +6,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, ArrowRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { API_URL } from "@/lib/api";
+
 
 const Verify = () => {
   const [isVerifying, setIsVerifying] = useState(false);
@@ -40,7 +40,7 @@ const Verify = () => {
 
   const handlePaste = (e: React.ClipboardEvent) => {
     e.preventDefault();
-    const pastedData = e.clipboardData.getData("text").slice(0, 6);
+    const pastedData = e.clipboardData.getData("text").slice(0, 6) as any;
     const newOtp = [...otp];
     
     for (let i = 0; i < pastedData.length; i++) {
@@ -65,13 +65,18 @@ const Verify = () => {
     setIsVerifying(true);
     const email = localStorage.getItem("email");
 
+    if (!email) {
+       toast.error("Email not found. Please register again.");
+       router.replace("/signup");
+       return;
+    }
+
     try {
-      const response = await fetch(`${API_URL}/auth/verify`, {
+      const response = await fetch("/api/auth/verify", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include",
         body: JSON.stringify({
           otp: otpValue,
           email,
@@ -107,12 +112,11 @@ const Verify = () => {
     }
 
     try {
-      const response = await fetch(`${API_URL}/auth/resend`, {
+      const response = await fetch("/api/auth/resend", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include",
         body: JSON.stringify({ email }),
       });
 

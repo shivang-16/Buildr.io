@@ -1,13 +1,17 @@
 "use client"
 
+
 import{Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { MessageCircle, ArrowUp, ArrowDown, BarChart2, Bookmark, Share, MoreHorizontal } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
 import { upvotePost, downvotePost } from "@/actions/post_actions"
+import { toggleBookmark } from "@/actions/user_actions"
+
 import { cn } from "@/lib/utils"
 import Image from "next/image"
+import Link from "next/link"
 
 interface Media {
   type: "image";
@@ -33,8 +37,10 @@ interface PostProps {
     views: string
   }
   userVote?: "upvote" | "downvote" | null
+  isBookmarked?: boolean
   showActions?: boolean
 }
+
 
 export function Post({ 
   id,
@@ -46,12 +52,14 @@ export function Post({
   media = [],
   stats,
   userVote = null,
+  isBookmarked = false,
   showActions = true
 }: PostProps) {
   const router = useRouter()
   const [vote, setVote] = useState<"upvote" | "downvote" | null>(userVote)
   const [upvoteCount, setUpvoteCount] = useState(stats.upvotes)
   const [downvoteCount, setDownvoteCount] = useState(stats.downvotes)
+  const [bookmarked, setBookmarked] = useState(isBookmarked)
   const [isPending, startTransition] = useTransition()
 
   const handlePostClick = (e: React.MouseEvent) => {
@@ -84,6 +92,18 @@ export function Post({
     })
   }
 
+  const handleBookmark = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    // Optimistic update
+    setBookmarked(!bookmarked)
+    
+    // We don't need transition here necessarily as it's just a toggle
+    const result = await toggleBookmark(id)
+    if (!result.success) {
+      setBookmarked(!bookmarked) // Revert on failure
+    }
+  }
+
   const handleReply = (e: React.MouseEvent) => {
     e.stopPropagation()
     router.push(`/post/${id}`)
@@ -95,17 +115,23 @@ export function Post({
       className="flex gap-4 border-b p-4 transition-colors hover:bg-accent/10 cursor-pointer"
     >
       <div className="shrink-0">
-        <Avatar>
-          <AvatarImage src={avatarSrc} />
-          <AvatarFallback>{name[0]}</AvatarFallback>
-        </Avatar>
+        <Link href={`/${handle.replace("@", "")}`} onClick={(e) => e.stopPropagation()}>
+          <Avatar>
+            <AvatarImage src={avatarSrc} />
+            <AvatarFallback>{name[0]}</AvatarFallback>
+          </Avatar>
+        </Link>
       </div>
 
       <div className="flex flex-col gap-2 w-full min-w-0">
         {/* Header */}
         <div className="flex items-center gap-2">
-            <span className="font-bold hover:underline truncate">{name}</span>
-            <span className="text-muted-foreground truncate">{handle}</span>
+            <Link href={`/${handle.replace("@", "")}`} onClick={(e) => e.stopPropagation()} className="font-bold hover:underline truncate">
+              {name}
+            </Link>
+            <Link href={`/${handle.replace("@", "")}`} onClick={(e) => e.stopPropagation()} className="text-muted-foreground truncate">
+              {handle}
+            </Link>
             <span className="text-muted-foreground">·</span>
             <span className="text-muted-foreground hover:underline whitespace-nowrap">{time}</span>
             <Button variant="ghost" size="icon" className="ml-auto h-8 w-8 shrink-0 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-full">
@@ -196,8 +222,16 @@ export function Post({
             </Button>
 
             <div className="flex">
-                <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-blue-500 hover:bg-blue-500/10 rounded-full">
-                    <Bookmark className="h-4 w-4" />
+                <Button 
+                   variant="ghost" 
+                   size="icon" 
+                   onClick={handleBookmark}
+                   className={cn(
+                     "h-8 w-8 hover:text-blue-500 hover:bg-blue-500/10 rounded-full",
+                     bookmarked && "text-blue-500"
+                   )}
+                >
+                    <Bookmark className={cn("h-4 w-4", bookmarked && "fill-current")} />
                 </Button>
                  <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-blue-500 hover:bg-blue-500/10 rounded-full">
                     <Share className="h-4 w-4" />

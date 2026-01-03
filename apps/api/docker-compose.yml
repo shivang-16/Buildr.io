@@ -1,0 +1,96 @@
+services:
+  buildr-api:
+    # For local development, use build
+    # build:
+    #   context: ../../
+    #   dockerfile: apps/api/Dockerfile
+    #   target: runner
+    # For production deployment, use image from Docker Hub
+    image: ${DOCKER_USERNAME}/buildr-api:latest
+    container_name: buildr-api
+    ports:
+      - "${PORT:-4000}:4000"
+    environment:
+      - PORT=${PORT:-4000}
+      - MONGO_DB_URL=${MONGO_DB_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_SERVICE=${SMTP_SERVICE}
+      - SMTP_PASS=${SMTP_PASS}
+      - SMTP_HOST=${SMTP_HOST}
+      - FRONTEND_URL=${FRONTEND_URL}
+      
+    volumes:
+      # Mount logs directory for persistent logging
+      - ./logs:/app/logs
+      
+    restart: unless-stopped
+    
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:4000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # Resource limits for production
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    
+    # Security options
+    security_opt:
+      - no-new-privileges:true
+    
+    # Network configuration
+    networks:
+      - buildr-network
+
+  # Optional: Redis service if you want to run Redis locally
+  # Uncomment if you don't have external Redis
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: buildr-redis
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis_data:/data
+  #   restart: unless-stopped
+  #   command: redis-server --appendonly yes
+  #   networks:
+  #     - buildr-network
+
+  # Optional: MongoDB service if you want to run MongoDB locally
+  # Uncomment if you don't have external MongoDB
+  # mongodb:
+  #   image: mongo:7
+  #   container_name: buildr-mongodb
+  #   ports:
+  #     - "27017:27017"
+  #   environment:
+  #     - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USERNAME:-admin}
+  #     - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD:-password}
+  #     - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE:-buildr_ai}
+  #   volumes:
+  #     - mongodb_data:/data/db
+  #   restart: unless-stopped
+  #   networks:
+  #     - buildr-network
+
+networks:
+  buildr-network:
+    driver: bridge
+
+# Uncomment if using local services
+# volumes:
+#   redis_data:
+#   mongodb_data:

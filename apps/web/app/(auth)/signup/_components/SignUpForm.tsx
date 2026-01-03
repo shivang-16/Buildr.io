@@ -15,7 +15,7 @@ import { Eye, EyeOff, Loader2, ArrowRight } from "lucide-react";
 import { signUpSchema } from "@/schemas/signUpSchema";
 import { toast } from "sonner";
 import GoogleLoginButton from "@/app/(auth)/_components/GoogleLoginButton";
-import { signUpUser } from "@/actions/user_actions";
+
 
 const SignUp = () => {
   const [togglePassword, setTogglePassword] = useState(false);
@@ -40,9 +40,18 @@ const SignUp = () => {
     setIsSubmitting(true);
 
     try {
-      const responseData = await signUpUser(data);
 
-      if (responseData.success) {
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      const responseData = await response.json();
+
+      if (response.ok) {
         toast.success(responseData.message || "Registration successful");
         localStorage.setItem("email", data.email);
         router.replace("/verify");

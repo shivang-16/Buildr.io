@@ -6,7 +6,8 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    const response = await apiClient.post('/api/auth/register', body);
+    const backendUrl = process.env.API_BASE_URL || "http://localhost:4000";
+    const response = await apiClient.post(`${backendUrl}/api/auth/register`, body);
     
     // Don't set cookie for registration - user needs to verify email first
     return NextResponse.json(response.data);

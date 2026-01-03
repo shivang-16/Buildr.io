@@ -67,8 +67,6 @@ const otpSchema = new Schema<IOTP>(
   }
 );
 
-// Index for quick lookup by email
-otpSchema.index({ email: 1 });
 
 const OTPModel = mongoose.model<IOTP>("OTP", otpSchema);
 

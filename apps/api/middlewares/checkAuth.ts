@@ -20,7 +20,6 @@ export const checkAuth = async (
   
   // No API key, check for cookie auth
   const { token } = req.cookies;
-  console.log(token, 'here is the token');
   if (!token) return next(new CustomError("Authentication required", 401));
 
   const secret = process.env.JWT_SECRET;

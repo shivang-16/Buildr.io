@@ -81,10 +81,6 @@ const userSchema = new Schema<IUser>(
       lowercase: true,
       minlength: [3, "Username must be at least 3 characters"],
       maxlength: [30, "Username cannot exceed 30 characters"],
-      match: [
-        /^[a-zA-Z0-9_]+$/,
-        "Username can only contain letters, numbers, and underscores",
-      ],
     },
     avatar: {
       type: String,
@@ -121,24 +117,33 @@ const userSchema = new Schema<IUser>(
       type: Boolean,
       default: false,
     },
-    followers: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
-    following: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
-    bookmarks: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Post",
-      },
-    ],
+    followers: {
+      type: [
+        {
+          type: Schema.Types.ObjectId,
+          ref: "User",
+        },
+      ],
+      default: [],
+    },
+    following: {
+      type: [
+        {
+          type: Schema.Types.ObjectId,
+          ref: "User",
+        },
+      ],
+      default: [],
+    },
+    bookmarks: {
+      type: [
+        {
+          type: Schema.Types.ObjectId,
+          ref: "Post",
+        },
+      ],
+      default: [],
+    },
     resetPasswordToken: {
       type: String,
       default: null,
@@ -158,10 +163,6 @@ const userSchema = new Schema<IUser>(
   }
 );
 
-// Indexes for better query performance
-userSchema.index({ email: 1 });
-userSchema.index({ username: 1 });
-userSchema.index({ createdAt: -1 });
 
 // Pre-save middleware for password hashing
 userSchema.pre("save", async function () {
