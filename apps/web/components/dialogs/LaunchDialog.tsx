@@ -32,7 +32,7 @@ const launchSchema = z.object({
   tagline: z.string().min(1, "Tagline is required").max(60, "Max 60 characters"),
   categories: z.string().optional(), // Handled separately
   builtWith: z.string().optional(), // Handled separately
-  isOpenSource: z.boolean().default(false),
+  isOpenSource: z.boolean().optional(),
   description: z.string().max(5000, "Max 5000 characters").optional(),
 })
 
@@ -157,7 +157,7 @@ export function LaunchDialog({ open, onOpenChange, onSuccess }: LaunchDialogProp
       formData.append("tagline", data.tagline)
       if (data.url) formData.append("url", data.url)
       if (data.description) formData.append("description", data.description)
-      formData.append("isOpenSource", String(data.isOpenSource))
+      formData.append("isOpenSource", String(!!data.isOpenSource))
       
       categories.forEach(cat => formData.append("categories[]", cat))
       techs.forEach(tech => formData.append("builtWith[]", tech))
