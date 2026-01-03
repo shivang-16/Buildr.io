@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only server.ts",
-    "build": "tsc"
+    "build": "tsc",
+    "start": "node dist/server.js"
   },
   "dependencies": {
     "axios": "^1.13.2",
