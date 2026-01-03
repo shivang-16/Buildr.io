@@ -3,13 +3,14 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useState, useEffect } from "react"
-import { Home, Bell, Bookmark, Search, PlusCircle, Mail } from "lucide-react"
+import { Home, Bell, Bookmark, Search, PlusCircle, Rocket } from "lucide-react"
 import { getNotifications } from "@/actions/notification_actions"
 import { CreatePostDialog } from "@/components/dialogs/CreatePostDialog"
 
 const bottomNavItems = [
   { icon: Home, label: "Home", href: "/feed" },
   { icon: Search, label: "Explore", href: "/explore" },
+  { icon: Rocket, label: "Builder Pad", href: "/launchpad" },
   { icon: Bell, label: "Notifications", href: "/notifications" },
   { icon: Bookmark, label: "Bookmarks", href: "/bookmarks" },
 ]

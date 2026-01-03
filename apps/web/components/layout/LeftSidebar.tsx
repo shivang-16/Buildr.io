@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useState, useEffect } from "react"
-import { Home, Bell, Bookmark, MoreHorizontal, Search } from "lucide-react"
+import { Home, Bell, Bookmark, MoreHorizontal, Search, Rocket } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { CreatePostDialog } from "@/components/dialogs/CreatePostDialog"
@@ -11,6 +11,7 @@ import { CreatePostDialog } from "@/components/dialogs/CreatePostDialog"
 const sidebarItems = [
   { icon: Home, label: "Home", href: "/feed" },
   { icon: Search, label: "Explore", href: "/explore" },
+  { icon: Rocket, label: "Builder Pad", href: "/launchpad" },
   { icon: Bell, label: "Notifications", href: "/notifications" },
   { icon: Bookmark, label: "Bookmarks", href: "/bookmarks" },
 ]

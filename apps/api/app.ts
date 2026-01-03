@@ -10,6 +10,7 @@ import googleRoutes from "./routes/googleAuth";
 import postRoutes from "./routes/post";
 import userRoutes from "./routes/user";
 import notificationRoutes from "./routes/notification";
+import launchRoutes from "./routes/launch";
 
 
 config({
@@ -62,6 +63,7 @@ app.use("/api/google", googleRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/launches", launchRoutes);
 
 
 app.get("/", (req, res) => {
