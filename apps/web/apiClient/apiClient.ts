@@ -118,6 +118,11 @@ class ApiClient {
       ...configHeaders,
     };
 
+    // Remove Content-Type for FormData (browser sets it with boundary)
+    if (data instanceof FormData) {
+      delete requestHeaders["Content-Type"];
+    }
+
     const requestUrl = this.buildURL(url, params);
 
     const requestConfig: RequestInit = {
@@ -133,8 +138,12 @@ class ApiClient {
         config.method?.toUpperCase() || "GET"
       )
     ) {
-      requestConfig.body =
-        typeof data === "string" ? data : JSON.stringify(data);
+      // Don't stringify FormData
+      if (data instanceof FormData) {
+        requestConfig.body = data;
+      } else {
+        requestConfig.body = typeof data === "string" ? data : JSON.stringify(data);
+      }
     }
 
     try {

@@ -3,12 +3,21 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { MessageCircle, Repeat2, Heart, BarChart2, Bookmark, Share, ArrowLeft, MoreHorizontal } from "lucide-react"
+import { MessageCircle, ArrowUp, ArrowDown, Bookmark, Share, ArrowLeft, MoreHorizontal } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
-import { createPost, likePost } from "@/actions/post_actions"
+import { createPost, upvotePost, downvotePost } from "@/actions/post_actions"
 import { cn } from "@/lib/utils"
-import Link from "next/link"
+import Image from "next/image"
+
+interface Media {
+  type: "image";
+  url: string;
+  publicId: string;
+  altText?: string;
+  width?: number;
+  height?: number;
+}
 
 interface PostDetailProps {
   id: string
@@ -17,14 +26,14 @@ interface PostDetailProps {
   handle: string
   time: string
   content: string
-  imageSrc?: string
+  media?: Media[]
   stats: {
-    replies: number
-    reposts: number
-    likes: number
+    comments: number
+    upvotes: number
+    downvotes: number
     views: string
   }
-  isLiked?: boolean
+  userVote?: "upvote" | "downvote" | null
 }
 
 export function PostDetail({ 
@@ -34,22 +43,35 @@ export function PostDetail({
   handle, 
   time, 
   content, 
-  imageSrc, 
+  media = [],
   stats,
-  isLiked = false
+  userVote = null
 }: PostDetailProps) {
   const router = useRouter()
-  const [liked, setLiked] = useState(isLiked)
-  const [likeCount, setLikeCount] = useState(stats.likes)
+  const [vote, setVote] = useState<"upvote" | "downvote" | null>(userVote)
+  const [upvoteCount, setUpvoteCount] = useState(stats.upvotes)
+  const [downvoteCount, setDownvoteCount] = useState(stats.downvotes)
   const [replyContent, setReplyContent] = useState("")
   const [isPending, startTransition] = useTransition()
 
-  const handleLike = async () => {
+  const handleUpvote = async () => {
     startTransition(async () => {
-      const result = await likePost(id)
+      const result = await upvotePost(id)
       if (result.success) {
-        setLiked(result.liked)
-        setLikeCount(result.likeCount)
+        setVote(result.upvoted ? "upvote" : null)
+        setUpvoteCount(result.upvoteCount)
+        setDownvoteCount(result.downvoteCount)
+      }
+    })
+  }
+
+  const handleDownvote = async () => {
+    startTransition(async () => {
+      const result = await downvotePost(id)
+      if (result.success) {
+        setVote(result.downvoted ? "downvote" : null)
+        setUpvoteCount(result.upvoteCount)
+        setDownvoteCount(result.downvoteCount)
       }
     })
   }
@@ -100,10 +122,28 @@ export function PostDetail({
         {/* Content */}
         <p className="mt-3 text-xl whitespace-pre-wrap break-words">{content}</p>
 
-        {/* Optional Image */}
-        {imageSrc && (
-          <div className="mt-3 rounded-2xl border overflow-hidden">
-            <img src={imageSrc} alt="Post content" className="w-full object-cover max-h-[500px]" />
+        {/* Media Images */}
+        {media.length > 0 && (
+          <div className={cn(
+            "mt-3 rounded-2xl overflow-hidden border gap-1 grid",
+            media.length === 1 ? "grid-cols-1" : media.length === 2 ? "grid-cols-2" : "grid-cols-2"
+          )}>
+            {media.map((item, index) => (
+              <div 
+                key={item.publicId} 
+                className={cn(
+                  "relative",
+                  media.length === 1 ? "aspect-video max-h-[500px]" : "aspect-square"
+                )}
+              >
+                <Image
+                  src={item.url}
+                  alt={item.altText || `Image ${index + 1}`}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            ))}
           </div>
         )}
 
@@ -118,16 +158,16 @@ export function PostDetail({
         {/* Stats Bar */}
         <div className="mt-3 py-3 flex gap-4 border-t border-b text-sm">
           <div className="flex items-center gap-1">
-            <span className="font-bold">{stats.replies}</span>
-            <span className="text-muted-foreground">Replies</span>
+            <span className="font-bold">{stats.comments}</span>
+            <span className="text-muted-foreground">Comments</span>
           </div>
           <div className="flex items-center gap-1">
-            <span className="font-bold">{stats.reposts}</span>
-            <span className="text-muted-foreground">Reposts</span>
+            <span className="font-bold">{upvoteCount}</span>
+            <span className="text-muted-foreground">Upvotes</span>
           </div>
           <div className="flex items-center gap-1">
-            <span className="font-bold">{likeCount}</span>
-            <span className="text-muted-foreground">Likes</span>
+            <span className="font-bold">{downvoteCount}</span>
+            <span className="text-muted-foreground">Downvotes</span>
           </div>
         </div>
 
@@ -136,20 +176,29 @@ export function PostDetail({
           <Button variant="ghost" size="icon" className="rounded-full hover:text-blue-500 hover:bg-blue-500/10">
             <MessageCircle className="h-5 w-5" />
           </Button>
-          <Button variant="ghost" size="icon" className="rounded-full hover:text-green-500 hover:bg-green-500/10">
-            <Repeat2 className="h-5 w-5" />
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={handleUpvote}
+            disabled={isPending}
+            className={cn(
+              "rounded-full hover:bg-orange-500/10",
+              vote === "upvote" ? "text-orange-500" : "hover:text-orange-500"
+            )}
+          >
+            <ArrowUp className={cn("h-5 w-5", vote === "upvote" && "fill-current")} />
           </Button>
           <Button 
             variant="ghost" 
             size="icon" 
-            onClick={handleLike}
+            onClick={handleDownvote}
             disabled={isPending}
             className={cn(
-              "rounded-full hover:bg-pink-500/10",
-              liked ? "text-pink-500" : "hover:text-pink-500"
+              "rounded-full hover:bg-blue-500/10",
+              vote === "downvote" ? "text-blue-500" : "hover:text-blue-500"
             )}
           >
-            <Heart className={cn("h-5 w-5", liked && "fill-current")} />
+            <ArrowDown className={cn("h-5 w-5", vote === "downvote" && "fill-current")} />
           </Button>
           <Button variant="ghost" size="icon" className="rounded-full hover:text-blue-500 hover:bg-blue-500/10">
             <Bookmark className="h-5 w-5" />

@@ -15,7 +15,7 @@ export default async function PostPage({ params }: PostPageProps) {
     notFound()
   }
 
-  const { post, replies = [] } = data
+  const { post, comments = [] } = data
 
   // Format time
   const formatTime = (dateStr: string) => {
@@ -59,31 +59,33 @@ export default async function PostPage({ params }: PostPageProps) {
         handle={`@${post.author.username || post.author.firstname.toLowerCase()}`}
         time={formatTime(post.createdAt)}
         content={post.content}
+        media={post.media}
         stats={{
-          replies: post.replies?.length || 0,
-          reposts: post.reposts?.length || 0,
-          likes: post.likes?.length || 0,
+          comments: post.replies?.length || 0,
+          upvotes: post.upvoteCount || 0,
+          downvotes: post.downvoteCount || 0,
           views: formatViews(post.viewCount || 0),
         }}
       />
 
-      {/* Replies */}
-      {replies.length > 0 && (
+      {/* Comments */}
+      {comments.length > 0 && (
         <div className="flex flex-col">
-          {replies.map((reply) => (
+          {comments.map((comment) => (
             <Post
-              key={reply._id}
-              id={reply._id}
-              avatarSrc={reply.author.avatar}
-              name={`${reply.author.firstname} ${reply.author.lastname || ""}`.trim()}
-              handle={`@${reply.author.username || reply.author.firstname.toLowerCase()}`}
-              time={formatRelativeTime(reply.createdAt)}
-              content={reply.content}
+              key={comment._id}
+              id={comment._id}
+              avatarSrc={comment.author.avatar}
+              name={`${comment.author.firstname} ${comment.author.lastname || ""}`.trim()}
+              handle={`@${comment.author.username || comment.author.firstname.toLowerCase()}`}
+              time={formatRelativeTime(comment.createdAt)}
+              content={comment.content}
+              media={comment.media}
               stats={{
-                replies: reply.replies?.length || 0,
-                reposts: reply.reposts?.length || 0,
-                likes: reply.likes?.length || 0,
-                views: formatViews(reply.viewCount || 0),
+                comments: comment.replies?.length || 0,
+                upvotes: comment.upvoteCount || 0,
+                downvotes: comment.downvoteCount || 0,
+                views: formatViews(comment.viewCount || 0),
               }}
             />
           ))}

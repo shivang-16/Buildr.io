@@ -2,9 +2,9 @@ import mongoose, { Document, Schema, Model } from "mongoose";
 
 // Interface for embedded media in posts
 interface IMedia {
-  type: "image" | "video" | "gif";
+  type: "image";
   url: string;
-  thumbnailUrl?: string;
+  publicId: string; // Cloudinary public ID for deletion
   altText?: string;
   width?: number;
   height?: number;
@@ -16,20 +16,14 @@ export interface IPost extends Document {
   author: mongoose.Types.ObjectId;
   content: string;
   media: IMedia[];
-  likes: mongoose.Types.ObjectId[];
-  reposts: mongoose.Types.ObjectId[];
-  quotes: mongoose.Types.ObjectId[];
+  upvotes: mongoose.Types.ObjectId[];
+  downvotes: mongoose.Types.ObjectId[];
   replies: mongoose.Types.ObjectId[];
-  replyTo: mongoose.Types.ObjectId | null; // If this post is a reply
-  quotedPost: mongoose.Types.ObjectId | null; // If this post is a quote tweet
-  isRepost: boolean;
-  originalPost: mongoose.Types.ObjectId | null; // If this is a repost
+  replyTo: mongoose.Types.ObjectId | null; // If this post is a comment/reply
   hashtags: string[];
   mentions: mongoose.Types.ObjectId[];
   viewCount: number;
-  isPinned: boolean;
   isDeleted: boolean;
-  visibility: "public" | "followers" | "mentioned";
   createdAt: Date;
   updatedAt: Date;
 }
@@ -44,15 +38,16 @@ const mediaSchema = new Schema<IMedia>(
   {
     type: {
       type: String,
-      enum: ["image", "video", "gif"],
+      enum: ["image"],
       required: true,
     },
     url: {
       type: String,
       required: true,
     },
-    thumbnailUrl: {
+    publicId: {
       type: String,
+      required: true,
     },
     altText: {
       type: String,
@@ -74,7 +69,7 @@ const postSchema = new Schema<IPost>(
     },
     content: {
       type: String,
-      maxlength: [280, "Post content cannot exceed 280 characters"],
+      maxlength: [2000, "Post content cannot exceed 2000 characters"],
       default: "",
     },
     media: {
@@ -87,22 +82,16 @@ const postSchema = new Schema<IPost>(
       },
       default: [],
     },
-    likes: [
+    upvotes: [
       {
         type: Schema.Types.ObjectId,
         ref: "User",
       },
     ],
-    reposts: [
+    downvotes: [
       {
         type: Schema.Types.ObjectId,
         ref: "User",
-      },
-    ],
-    quotes: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Post",
       },
     ],
     replies: [
@@ -116,20 +105,6 @@ const postSchema = new Schema<IPost>(
       ref: "Post",
       default: null,
       index: true,
-    },
-    quotedPost: {
-      type: Schema.Types.ObjectId,
-      ref: "Post",
-      default: null,
-    },
-    isRepost: {
-      type: Boolean,
-      default: false,
-    },
-    originalPost: {
-      type: Schema.Types.ObjectId,
-      ref: "Post",
-      default: null,
     },
     hashtags: {
       type: [String],
@@ -146,19 +121,10 @@ const postSchema = new Schema<IPost>(
       type: Number,
       default: 0,
     },
-    isPinned: {
-      type: Boolean,
-      default: false,
-    },
     isDeleted: {
       type: Boolean,
       default: false,
       index: true,
-    },
-    visibility: {
-      type: String,
-      enum: ["public", "followers", "mentioned"],
-      default: "public",
     },
   },
   {
@@ -170,7 +136,8 @@ const postSchema = new Schema<IPost>(
 postSchema.index({ author: 1, createdAt: -1 });
 postSchema.index({ createdAt: -1 });
 postSchema.index({ hashtags: 1, createdAt: -1 });
-postSchema.index({ isDeleted: 1, visibility: 1, createdAt: -1 });
+postSchema.index({ isDeleted: 1, createdAt: -1 });
+postSchema.index({ replyTo: 1, createdAt: -1 });
 
 // Pre-save middleware to extract hashtags and mentions
 postSchema.pre("save", function () {
@@ -184,19 +151,14 @@ postSchema.pre("save", function () {
   }
 });
 
-// Virtual for engagement count
-postSchema.virtual("engagementCount").get(function () {
-  return (
-    (this.likes?.length || 0) +
-    (this.reposts?.length || 0) +
-    (this.replies?.length || 0) +
-    (this.quotes?.length || 0)
-  );
+// Virtual for upvote count
+postSchema.virtual("upvoteCount").get(function () {
+  return this.upvotes?.length || 0;
 });
 
-// Virtual for like count
-postSchema.virtual("likeCount").get(function () {
-  return this.likes?.length || 0;
+// Virtual for downvote count
+postSchema.virtual("downvoteCount").get(function () {
+  return this.downvotes?.length || 0;
 });
 
 // Virtual for reply count
@@ -204,14 +166,14 @@ postSchema.virtual("replyCount").get(function () {
   return this.replies?.length || 0;
 });
 
-// Virtual for repost count
-postSchema.virtual("repostCount").get(function () {
-  return this.reposts?.length || 0;
+// Virtual for score (upvotes - downvotes)
+postSchema.virtual("score").get(function () {
+  return (this.upvotes?.length || 0) - (this.downvotes?.length || 0);
 });
 
 // Static method to find posts by author
 postSchema.statics.findByAuthor = function (authorId: mongoose.Types.ObjectId) {
-  return this.find({ author: authorId, isDeleted: false })
+  return this.find({ author: authorId, isDeleted: false, replyTo: null })
     .sort({ createdAt: -1 })
     .populate("author", "firstname lastname username avatar isVerified");
 };
@@ -237,11 +199,7 @@ postSchema.statics.findFeedForUser = async function (
     .sort({ createdAt: -1 })
     .skip((page - 1) * limit)
     .limit(limit)
-    .populate("author", "firstname lastname username avatar isVerified")
-    .populate({
-      path: "quotedPost",
-      populate: { path: "author", select: "firstname lastname username avatar" },
-    });
+    .populate("author", "firstname lastname username avatar isVerified");
 };
 
 // Ensure virtuals are included in JSON output

@@ -4,9 +4,11 @@ import { useState, useTransition } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Post } from "./Post"
-import { Image as ImageIcon, Smile, MapPin, Calendar, FileType, Loader2 } from "lucide-react"
-import { createPost, Post as PostType } from "@/actions/post_actions"
+import { Image as ImageIcon, Loader2, X } from "lucide-react"
+import { Post as PostType } from "@/actions/post_actions"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner"
+import Image from "next/image"
 
 interface FeedProps {
   initialPosts?: PostType[]
@@ -16,6 +18,8 @@ export function Feed({ initialPosts = [] }: FeedProps) {
   const [tab, setTab] = useState<"for-you" | "following">("for-you")
   const [posts, setPosts] = useState<PostType[]>(initialPosts)
   const [newPostContent, setNewPostContent] = useState("")
+  const [images, setImages] = useState<File[]>([])
+  const [imagePreviews, setImagePreviews] = useState<string[]>([])
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
 
@@ -38,15 +42,71 @@ export function Feed({ initialPosts = [] }: FeedProps) {
     return count.toString()
   }
 
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || [])
+    
+    if (files.length + images.length > 4) {
+      toast.error("Maximum 4 images allowed")
+      return
+    }
+
+    // Validate file size (15MB max)
+    const validFiles = files.filter((file) => {
+      if (file.size > 15 * 1024 * 1024) {
+        toast.error(`${file.name} is too large. Max 15MB per image.`)
+        return false
+      }
+      return true
+    })
+
+    if (validFiles.length === 0) return
+
+    setImages((prev) => [...prev, ...validFiles])
+
+    // Create previews
+    validFiles.forEach((file) => {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setImagePreviews((prev) => [...prev, reader.result as string])
+      }
+      reader.readAsDataURL(file)
+    })
+  }
+
+  const removeImage = (index: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== index))
+    setImagePreviews((prev) => prev.filter((_, i) => i !== index))
+  }
+
   const handleCreatePost = () => {
-    if (!newPostContent.trim()) return
+    if (!newPostContent.trim() && images.length === 0) return
 
     startTransition(async () => {
-      const result = await createPost(newPostContent)
-      if (result.success && result.post) {
-        setPosts([result.post, ...posts])
-        setNewPostContent("")
-        router.refresh()
+      try {
+        const formData = new FormData()
+        formData.append("content", newPostContent)
+        images.forEach((image) => {
+          formData.append("images", image)
+        })
+
+        const response = await fetch("/api/posts", {
+          method: "POST",
+          body: formData,
+        })
+
+        const result = await response.json()
+        if (result.success && result.post) {
+          setPosts([result.post, ...posts])
+          setNewPostContent("")
+          setImages([])
+          setImagePreviews([])
+          router.refresh()
+        } else {
+          toast.error(result.message || "Failed to create post")
+        }
+      } catch (error) {
+        console.error(error)
+        toast.error("Failed to create post")
       }
     })
   }
@@ -87,35 +147,69 @@ export function Feed({ initialPosts = [] }: FeedProps) {
                 value={newPostContent}
                 onChange={(e) => setNewPostContent(e.target.value)}
                 className="bg-transparent text-xl placeholder:text-muted-foreground focus:outline-none resize-none min-h-[60px]"
-                maxLength={280}
+                maxLength={2000}
              />
+
+             {/* Image Previews */}
+             {imagePreviews.length > 0 && (
+               <div className={`grid gap-2 ${
+                 imagePreviews.length === 1 ? "grid-cols-1" :
+                 imagePreviews.length === 2 ? "grid-cols-2" :
+                 "grid-cols-2"
+               } max-h-[200px] overflow-hidden rounded-2xl border`}>
+                 {imagePreviews.map((preview, index) => (
+                   <div key={index} className="relative aspect-video">
+                     <Image
+                       src={preview}
+                       alt={`Preview ${index + 1}`}
+                       fill
+                       className="object-cover"
+                     />
+                     <button
+                       onClick={() => removeImage(index)}
+                       className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white rounded-full p-1"
+                     >
+                       <X className="h-4 w-4" />
+                     </button>
+                   </div>
+                 ))}
+               </div>
+             )}
+
              <div className="flex items-center justify-between border-t pt-3">
                  <div className="flex gap-2 text-primary">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-primary hover:bg-primary/10">
-                        <ImageIcon className="h-5 w-5" />
-                    </Button>
-                     <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-primary hover:bg-primary/10">
-                        <FileType className="h-5 w-5" />
-                    </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-primary hover:bg-primary/10">
-                        <Smile className="h-5 w-5" />
-                    </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-primary hover:bg-primary/10">
-                        <Calendar className="h-5 w-5" />
-                    </Button>
-                     <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-primary hover:bg-primary/10">
-                        <MapPin className="h-5 w-5" />
-                    </Button>
+                    <input
+                      type="file"
+                      id="feed-image-upload"
+                      accept="image/*"
+                      multiple
+                      onChange={handleImageSelect}
+                      className="hidden"
+                      disabled={images.length >= 4}
+                    />
+                    <label htmlFor="feed-image-upload">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8 rounded-full text-primary hover:bg-primary/10"
+                        asChild
+                        disabled={images.length >= 4}
+                      >
+                        <span>
+                          <ImageIcon className="h-5 w-5" />
+                        </span>
+                      </Button>
+                    </label>
                  </div>
                  <div className="flex items-center gap-3">
                    {newPostContent.length > 0 && (
-                     <span className={`text-sm ${newPostContent.length > 260 ? 'text-destructive' : 'text-muted-foreground'}`}>
-                       {280 - newPostContent.length}
+                     <span className={`text-sm ${newPostContent.length > 1900 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                       {2000 - newPostContent.length}
                      </span>
                    )}
                    <Button 
                      onClick={handleCreatePost}
-                     disabled={isPending || !newPostContent.trim()}
+                     disabled={isPending || (!newPostContent.trim() && images.length === 0)}
                      className="rounded-full bg-primary px-4 font-bold text-primary-foreground"
                    >
                      {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Post"}
@@ -136,12 +230,14 @@ export function Feed({ initialPosts = [] }: FeedProps) {
                 handle={`@${post.author.username || post.author.firstname.toLowerCase()}`}
                 time={formatRelativeTime(post.createdAt)}
                 content={post.content}
+                media={post.media}
                 stats={{
-                  replies: post.replies?.length || 0,
-                  reposts: post.reposts?.length || 0,
-                  likes: post.likes?.length || 0,
+                  comments: post.replies?.length || 0,
+                  upvotes: post.upvoteCount || 0,
+                  downvotes: post.downvoteCount || 0,
                   views: formatViews(post.viewCount || 0),
                 }}
+                userVote={post.upvotes?.includes("current-user-id") ? "upvote" : post.downvotes?.includes("current-user-id") ? "downvote" : null}
               />
           ))}
           {posts.length === 0 && (
