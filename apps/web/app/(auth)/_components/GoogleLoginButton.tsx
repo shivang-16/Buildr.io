@@ -17,7 +17,7 @@ const GoogleLoginButton = () => {
     onSuccess: async (credentialResponse) => {
       setIsLoading(true);
       try {
-        const res = await fetch("/api/google/auth", {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/google/auth`, {
           method: "POST",
           body: JSON.stringify({
             access_token: credentialResponse.access_token,

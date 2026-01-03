@@ -64,13 +64,22 @@ app.use("/api/users", userRoutes);
 app.use("/api/notifications", notificationRoutes);
 
 
+app.get("/", (req, res) => {
+  res.send("API is running...");
+});
+
 app.get("/api", (req, res) => {
   res.send("Hello, world!");
 });
 
-app.get("/health", (req, res) => {
-  res.status(200).json({ status: "ok" });
-});
+ app.get("/health", (req, res) => {
+    res.status(200).json({
+      status: "healthy",
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      environment: process.env.NODE_ENV || "development",
+    });
+  });
 
 app.use(errorMiddleware);
 

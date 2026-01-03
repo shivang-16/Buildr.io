@@ -72,7 +72,7 @@ const Verify = () => {
     }
 
     try {
-      const response = await fetch("/api/auth/verify", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/auth/verify`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
