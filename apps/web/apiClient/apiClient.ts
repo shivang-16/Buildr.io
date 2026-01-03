@@ -39,7 +39,7 @@ class ApiClient {
 
   constructor(config: ApiClientConfig = {}) {
     this.baseURL =
-      config.baseURL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+      config.baseURL || process.env.NEXT_PUBLIC_API_URL || "https://ec2-65-2-40-197.ap-south-1.compute.amazonaws.com";
     this.defaultHeaders = {
       "Content-Type": "application/json",
       ...config.headers,
@@ -209,7 +209,7 @@ class ApiClient {
 
 // Create and export the default instance
 const apiClient = new ApiClient({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000",
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "https://ec2-65-2-40-197.ap-south-1.compute.amazonaws.com",
   credentials: "include",
   headers: {
     "Content-Type": "application/json",

@@ -1,6 +1,7 @@
 import { ReactNode } from "react"
 import { LeftSidebar } from "./LeftSidebar"
 import { RightSidebar } from "./RightSidebar"
+import { BottomNav } from "./BottomNav"
 
 interface MainLayoutProps {
   children: ReactNode
@@ -23,6 +24,7 @@ export function MainLayout({ children }: MainLayoutProps) {
             {/* Right Sidebar - fixed width */}
             <RightSidebar />
         </div>
+        <BottomNav />
     </div>
   )
 }
