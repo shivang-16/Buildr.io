@@ -17,19 +17,19 @@ export const getFeedPosts = async (
 
     const posts = await Post.find({
       isDeleted: false,
-      replyTo: null, // Only top-level posts, not comments
+      replyTo: null, 
     })
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
       .populate("author", "firstname lastname username avatar isVerified");
 
-    res.status(200).json({
-      success: true,
-      posts,
-      page,
-      hasMore: posts.length === limit,
-    });
+    // res.status(200).json({
+    //   success: true,
+    //   posts,
+    //   page,
+    //   hasMore: posts.length === limit,
+    // });
   } catch (error: unknown) {
     next(new CustomError(error instanceof Error ? error.message : "An error occurred"));
   }
